@@ -10,15 +10,8 @@ const hex4 = `[0-9A-Fa-f]{4}`
 export const MacAddress: string = `(?:(?:${hex2}[:\\-]){5}${hex2}|(?:${hex4}\\.){2}${hex4})`
 export const MacAddressCompiled: RegExp = new RegExp(`^${MacAddress}$`)
 
-const ipv4Addr = `(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])`
+// const ipv4Addr = `(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])`
 const ipv6Addr = `(?:(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}|::)`
-/**
- * "Pure" IP address handler.
- * Supports IPv4 and IPv6 addresses without port suffix.
- */
-export const IpAddress: string = `(?:${ipv4Addr}|${ipv6Addr})`
-export const IpAddressCompiled: RegExp = new RegExp(`^${IpAddress}$`)
-
 const hostLabel = `[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?`
 const hostIpv4 = `(?:${hostLabel}(?:\\.${hostLabel})*)`
 const host = `(?:${hostIpv4}|\\[${ipv6Addr}\\])`
