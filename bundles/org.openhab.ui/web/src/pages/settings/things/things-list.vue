@@ -175,12 +175,15 @@
               </template>
               <template #after>
                 <div class="badge-with-marker">
-                  <f7-badge :color="thingStatusBadgeColor(thing.statusInfo)" :tooltip="thing.statusInfo.description || null">
-                    {{ thingStatusBadgeText(thing.statusInfo) }}
+                  <f7-badge
+                    :color="thingStatusBadgeColor(thing.statusInfo)"
+                    :tooltip="thing.statusInfo.description || null">
+                      {{ thingStatusBadgeText(thing.statusInfo) }}
                   </f7-badge>
                   <span
-                    v-if="thing.statusInfo.status === 'ONLINE' && thing.statusInfo.description && thing.statusInfo.description !== ''"
-                    class="badge-marker-dot">
+                    v-if="thing.statusInfo.decoratorStyle && thing.statusInfo.decoratorStyle !== 'NONE'"
+                    class="badge-marker-dot"
+                    :class="`decoratorStyle-${thing.statusInfo.decoratorStyle}`">
                   </span>
                 </div>
               </template>
@@ -224,16 +227,25 @@
   .badge-with-marker
     position relative
     display inline-block
+
   .badge-marker-dot
     position absolute
     top -4px
     right -4px
     width 10px
     height 10px
-    background-color var(--f7-color-blue)
     border 1px solid var(--f7-list-bg-color)
     border-radius 50%
     pointer-events none
+
+    &.decoratorStyle-INFORMATION
+      background-color var(--f7-color-blue)
+
+    &.decoratorStyle-WARNING
+      background-color var(--f7-color-orange)
+
+    &.decoratorStyle-CRITICAL
+      background-color var(--f7-color-red)
 </style>
 
 <script>
