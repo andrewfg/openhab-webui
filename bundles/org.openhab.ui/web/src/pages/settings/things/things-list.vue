@@ -174,14 +174,19 @@
                 </div>
               </template>
               <template #after>
-                <div class="badge-with-marker">
+                <div class="badge-with-marker" style="position: relative; display: inline-block;">
                   <f7-badge :color="thingStatusBadgeColor(thing.statusInfo)" :tooltip="thing.statusInfo.description || null">
                     {{ thingStatusBadgeText(thing.statusInfo) }}
                   </f7-badge>
-                  <span
-                    v-if="thing.statusInfo.status === 'ONLINE' && thing.statusInfo.description && thing.statusInfo.description !== ''"
-                    class="badge-marker-dot">
-                  </span>
+                  <f7-icon
+                      v-if="thing.statusInfo.status === 'ONLINE' && thing.statusInfo.description && thing.statusInfo.description.trim() !== ''"
+                      class="badge-marker-dot"
+                      f7="info"
+                      color="white"
+                      size="11px"
+                      :tooltip="thing.statusInfo.description || null"
+                      tooltip-trigger="hover"
+                  />
                 </div>
               </template>
               <template #after-title>
@@ -228,12 +233,16 @@
     position absolute
     top -4px
     right -4px
-    width 10px
-    height 10px
+    width 16px
+    height 16px
     background-color var(--f7-color-blue)
     border 1px solid var(--f7-list-bg-color)
     border-radius 50%
-    pointer-events none
+    pointer-events auto
+    display flex
+    align-items center
+    justify-content center
+    cursor help
 </style>
 
 <script>
