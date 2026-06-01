@@ -597,6 +597,8 @@ import { useModelStore } from '@/js/stores/useModelStore'
 
 import { getRoot } from '@/api'
 
+const dayjsLocalesGlob = import.meta.glob('../node_modules/dayjs/esm/locale/*.js', { import: 'default' })
+
 export default {
   mixins: [auth, connectionHealth, sseEvents],
   components: {
@@ -910,14 +912,11 @@ export default {
             // there is no single Norwegian locale in dayjs, so use nb (Norwegian Bokmål)
             if (dayjsLocale?.key === 'no') dayjsLocale = dayjsLocales.find((l) => l.key === 'nb')
 
-            dayjsLocalePromise = dayjsLocale
-              ? import(`../node_modules/dayjs/esm/locale/${dayjsLocale.key}.js`)
-                  .then((data) => {
-                    return data.default
-                  })
-                  .catch((error) => {
-                    console.error('Error fetching dayjs: ', error, dayjsLocale)
-                  })
+            const dayjsLoader = dayjsLocalesGlob[`../node_modules/dayjs/esm/locale/${dayjsLocale.key}.js`]
+            dayjsLocalePromise = dayjsLoader
+              ? dayjsLoader().catch((error) => {
+                  console.error('Error fetching dayjs: ', error, dayjsLocale)
+                })
               : Promise.resolve(null)
           }
           return Promise.all([useComponentsStore().loadPagesAndWidgets(), dayjsLocalePromise])
@@ -1007,6 +1006,19 @@ export default {
     toggleLogDockFullscreen() {
       if (!useRuntimeStore().showLogDock) this.setLogDockVisible(true)
       this.logDockFullscreen = !this.logDockFullscreen
+      if (!this.logDockFullscreen) {
+        this.$nextTick(() => this.avoidLogDockOverflow())
+      }
+    },
+    avoidLogDockOverflow() {
+      if (this.logDockFullscreen || !useRuntimeStore().showLogDock) return
+
+      const maxHeight = window.innerHeight
+      const currentHeight =
+        this.logDockHeight || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--log-dock-height')) || 300
+      if (currentHeight > maxHeight) {
+        this.logDockHeight = Math.round(maxHeight)
+      }
     },
     startDockResize(ev) {
       const startY = ev.clientY
@@ -1324,6 +1336,7 @@ export default {
 
       if (window) {
         window.addEventListener('keydown', this.keyDown)
+        window.addEventListener('resize', this.avoidLogDockOverflow)
       }
 
       this._panelLayoutListener = () => {
@@ -1343,6 +1356,7 @@ export default {
   beforeUnmount() {
     if (window) {
       window.removeEventListener('keydown', this.keyDown)
+      window.removeEventListener('resize', this.avoidLogDockOverflow)
       if (this._logDockResizeHandlers) {
         const { onMove, onUp, onCancel } = this._logDockResizeHandlers
         window.removeEventListener('pointermove', onMove)
