@@ -1,4 +1,4 @@
-import { ref, computed, type Ref, watch, onMounted, useTemplateRef } from 'vue'
+import { ref, computed, type Ref, type WatchSource, watch, onMounted, useTemplateRef } from 'vue'
 import type { Router } from 'framework7'
 import { showConfirmDialog } from '@/js/dialog-promises'
 import fastDeepEqual from 'fast-deep-equal/es6'
@@ -92,27 +92,29 @@ export function useDirty(pageRefOrName: string | Ref<PageRef> | null) {
    * Sets up change tracking for a reactive data object.
    *
    * Monitors the provided ref for deep changes and updates the dirty flag accordingly.
-   * Captures the initial data state as the "pristine" baseline. When data changes from
+   * Captures the initial data state as the "pristine" baseline when the watched value changes from null/undefined
+   * to a real value (subsequent changes from null also update the pristine value). When data changes from
    * the pristine state, dirty is set to true. When `dirty` is explicitly set to false
    * (e.g., after saving), the current data state becomes the new pristine baseline.
    *
    * @param value - The ref to watch for changes (typically your data model)
    * @param dirtyRef - Optional, currently unused (kept for API compatibility)
    */
-  function setupDirtyWatch(value: Ref<unknown>, dirtyRef?: Ref<boolean>) {
-    let pristineValue = cloneDeep(value.value)
+  function setupDirtyWatch(value: WatchSource<unknown>, dirtyRef?: Ref<boolean>) {
+    const getCurrentValue = () => (typeof value === 'function' ? value() : value.value)
+    let pristineValue = cloneDeep(getCurrentValue())
 
     watch(dirty, (newValue) => {
       if (!newValue) {
         // Update the pristine value when dirty is set to false, e.g. after saving
-        pristineValue = cloneDeep(value.value)
+        pristineValue = cloneDeep(getCurrentValue())
       }
     })
 
     watch(
       value,
       (newValue, oldValue) => {
-        if (oldValue === undefined) {
+        if (newValue && (oldValue === null || oldValue === undefined)) {
           // First time real data is loaded, capture it as pristine baseline
           pristineValue = cloneDeep(newValue)
           dirty.value = false
